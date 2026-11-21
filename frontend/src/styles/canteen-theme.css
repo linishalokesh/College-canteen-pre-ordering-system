@@ -1,0 +1,567 @@
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Nunito+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700&display=swap');
+
+.app-shell {
+  --m-cream: #F8F7F1;
+  --m-green: #79a953;
+  --m-green-dark: #608d40;
+  --m-text: #303a32;
+  --m-muted: #969b90;
+
+  min-height: 100vh;
+  color: var(--m-text);
+  background: var(--m-cream);
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.app-shell button {
+  font-family: inherit;
+  transition: .2s ease;
+}
+
+/* Sidebar */
+
+.app-shell .sidebar,
+.app-shell .topbar {
+  background: #fffefa;
+  border-color: #e7ede5;
+}
+
+.app-shell .brand-icon {
+  background: #79a953;
+  border-radius: 15px;
+}
+
+.app-shell .brand h2 {
+  font-family: 'Playfair Display', serif;
+}
+
+.app-shell .brand h2 span {
+  color: #79a953;
+}
+
+.app-shell .nav-item {
+  border-radius: 11px;
+  font-weight: 700;
+}
+
+.app-shell .nav-item.active {
+  background: #eaf2df;
+  color: #608d40;
+}
+
+.app-shell .nav-item:hover {
+  background: #f1f6e9;
+  color: #608d40;
+}
+
+.app-shell .nav-count {
+  background: #f7ddc8;
+  color: #a96f50;
+}
+
+.app-shell .canteen-card {
+  background: #f1f5eb;
+  border: 1px solid #e7edde;
+  border-radius: 13px;
+}
+
+.app-shell .online-dot {
+  background: #79b365;
+}
+
+/* Main layout */
+
+.app-shell .main-content {
+  background: #F8F7F1;
+}
+
+.app-shell .page-content {
+  max-width: 1650px;
+}
+
+.app-shell .breadcrumb strong {
+  color: #638b4e;
+}
+
+.app-shell .search-box,
+.app-shell .food-search,
+.app-shell .category-search,
+.app-shell .av-search,
+.app-shell .om-search,
+.app-shell .oh-search {
+  background: #f3f6f0;
+  border: 1px solid #edf0e8;
+  border-radius: 11px;
+}
+
+.app-shell .search-box:focus-within,
+.app-shell .food-search:focus-within,
+.app-shell .category-search:focus-within,
+.app-shell .av-search:focus-within,
+.app-shell .om-search:focus-within,
+.app-shell .oh-search:focus-within {
+  border-color: #a7be92;
+  box-shadow: 0 0 0 3px #79a95315;
+}
+
+/* Typography */
+
+.app-shell .date-label,
+.app-shell .eyebrow {
+  color: #829577;
+  font-weight: 800;
+}
+
+.app-shell .welcome-section h1,
+.app-shell .food-heading h1,
+.app-shell .category-heading h1,
+.app-shell .av-heading h1,
+.app-shell .om-heading h1,
+.app-shell .oh-heading h1 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: #303a32;
+}
+
+.app-shell .welcome-section h1 span:first-of-type,
+.app-shell .food-heading h1 span,
+.app-shell .category-heading h1 span,
+.app-shell .av-heading h1 span,
+.app-shell .om-heading h1 span,
+.app-shell .oh-heading h1 span {
+  color: #608d40;
+}
+
+/* Buttons */
+
+.app-shell .primary-button {
+  background: #79a953;
+  border-radius: 11px;
+  font-weight: 800;
+  box-shadow: 0 5px 13px #79a95322;
+}
+
+.app-shell .primary-button:hover {
+  background: #608d40;
+  transform: translateY(-2px);
+}
+
+/* Dashboard cards */
+
+.app-shell .stat-card:nth-child(1) {
+  background: #f5f9ef;
+}
+
+.app-shell .stat-card:nth-child(2) {
+  background: #fff5ed;
+}
+
+.app-shell .stat-card:nth-child(3) {
+  background: #fff9e9;
+}
+
+.app-shell .stat-card:nth-child(4) {
+  background: #f6f1fa;
+}
+
+.app-shell .stat-card,
+.app-shell .panel,
+.app-shell .food-summary-card,
+.app-shell .category-overview-card,
+.app-shell .av-stat,
+.app-shell .om-stat,
+.app-shell .oh-stat {
+  border: 1px solid #e9eee6;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px #51674609;
+}
+
+.app-shell .panel,
+.app-shell .food-catalog,
+.app-shell .category-catalog,
+.app-shell .av-catalog,
+.app-shell .om-orders,
+.app-shell .oh-catalog {
+  background: #fffefa;
+  border: 1px solid #e9eee6;
+  border-radius: 18px;
+  box-shadow: 0 5px 18px #50664708;
+}
+
+.app-shell .panel-heading h2,
+.app-shell .catalog-heading h2,
+.app-shell .category-catalog-heading h2,
+.app-shell .av-catalog-heading h2,
+.app-shell .om-orders-heading h2,
+.app-shell .oh-catalog-heading h2 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 800;
+  color: #344036;
+}
+
+.app-shell .sage-icon {
+  background: #deebce;
+  color: #69934e;
+}
+
+.app-shell .peach-icon {
+  background: #f9dfcb;
+  color: #c27e54;
+}
+
+.app-shell .yellow-icon {
+  background: #f8edc5;
+  color: #aa8e41;
+}
+
+.app-shell .lavender-icon {
+  background: #e9def1;
+  color: #927baa;
+}
+
+/* Food management */
+
+.app-shell .food-card,
+.app-shell .category-card {
+  background: white;
+  border: 1px solid #e9eee7;
+  border-radius: 17px;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.app-shell .food-card:hover,
+.app-shell .category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 26px #51674617;
+}
+
+.app-shell .food-image {
+  position: relative;
+  height: 183px;
+  overflow: hidden;
+  background: #edf2e7;
+}
+
+.app-shell .food-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+}
+
+.app-shell .food-card:hover .food-photo {
+  transform: scale(1.06);
+}
+
+.app-shell .food-fallback {
+  font-size: 65px;
+}
+
+.app-shell .availability {
+  z-index: 1;
+  background: #ffffffed;
+  color: #618d49;
+  box-shadow: 0 2px 8px #0000000a;
+}
+
+.app-shell .availability.unavailable {
+  background: #fff0ec;
+  color: #bb7068;
+}
+
+.app-shell .food-delete {
+  z-index: 2;
+  opacity: 1;
+  background: #fffefaed;
+  color: #b8756d;
+  backdrop-filter: blur(8px);
+}
+
+.app-shell .food-card-content h3,
+.app-shell .category-card-title h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 800;
+}
+
+.app-shell .food-card-bottom > strong {
+  color: #618e48;
+}
+
+.app-shell .food-actions button {
+  background: #f5f7f1;
+  border-color: #ebefe7;
+  color: #72935e;
+}
+
+.app-shell .food-actions button:hover {
+  background: #e7f0dc;
+}
+
+.app-shell .food-category {
+  color: #819677;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* Category management */
+
+.app-shell .category-art {
+  height: 165px;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-shell .category-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+}
+
+.app-shell .category-card:hover .category-photo {
+  transform: scale(1.06);
+}
+
+.app-shell .category-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, #17211955);
+  pointer-events: none;
+}
+
+.app-shell .category-number {
+  color: white;
+  z-index: 1;
+  text-shadow: 0 1px 4px #0005;
+}
+
+.app-shell .category-card-actions {
+  z-index: 2;
+  opacity: 1;
+}
+
+.app-shell .category-card-footer strong {
+  color: #608d40;
+}
+
+/* Availability */
+
+.app-shell .av-food-image {
+  overflow: hidden;
+  position: relative;
+  background: #edf2e7;
+}
+
+.app-shell .av-food-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-shell .is-available {
+  background: #edf4e5;
+  color: #668e4c;
+}
+
+.app-shell .is-soldout {
+  background: #fae8e4;
+  color: #bb756d;
+}
+
+.app-shell .toggle-on {
+  background: #79a953;
+}
+
+.app-shell .toggle-off {
+  background: #d8dcd4;
+}
+
+/* Category filters */
+
+.app-shell .category-chip,
+.app-shell .av-filter,
+.app-shell .oh-filter {
+  background: white;
+  border-color: #e8ede3;
+  color: #798474;
+  border-radius: 30px;
+  font-weight: 700;
+}
+
+.app-shell .category-chip.selected,
+.app-shell .av-filter.active,
+.app-shell .oh-filter.active {
+  background: #79a953;
+  border-color: #79a953;
+  color: white;
+}
+
+/* Order management */
+
+.app-shell .om-order-card {
+  background: white;
+  border: 1px solid #e9eee7;
+  border-radius: 15px;
+  transition: .2s ease;
+}
+
+.app-shell .om-order-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px #51674612;
+}
+
+.app-shell .om-order-top h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 800;
+}
+
+.app-shell .om-order-details {
+  background: #f4f7ef;
+  border-radius: 10px;
+}
+
+.app-shell .om-advance {
+  background: #79a953;
+  border-radius: 9px;
+}
+
+.app-shell .om-advance:hover {
+  background: #608d40;
+}
+
+.app-shell .om-reject {
+  background: #fae9e5;
+  border-radius: 9px;
+}
+
+/* Order history */
+
+.app-shell .oh-table tbody tr:hover {
+  background: #f7f9f3;
+}
+
+.app-shell .oh-id {
+  color: #638e4a !important;
+  font-weight: 800;
+}
+
+.app-shell .oh-amount {
+  color: #3b4938 !important;
+  font-weight: 800;
+}
+
+/* Popular food images */
+
+.app-shell .food-emoji {
+  overflow: hidden;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.app-shell .popular-food-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Form validation */
+
+.app-shell .food-form-error {
+  color: #b65e58;
+  background: #fae8e4;
+  padding: 9px 11px;
+  font-size: 11px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+/* Modals */
+
+.app-shell .food-modal,
+.app-shell .category-modal {
+  background: #fffefa;
+  border: 1px solid #edf0e9;
+  border-radius: 20px;
+  box-shadow: 0 25px 80px #26392730;
+}
+
+.app-shell .food-modal input,
+.app-shell .food-modal select,
+.app-shell .category-modal input,
+.app-shell .category-modal textarea {
+  background: #f7f9f4;
+  border: 1px solid #e7ece2;
+  border-radius: 10px;
+}
+
+.app-shell .food-modal input:focus,
+.app-shell .food-modal select:focus,
+.app-shell .category-modal input:focus,
+.app-shell .category-modal textarea:focus {
+  border-color: #94af7e;
+  outline: none;
+}
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+  .app-shell .food-grid,
+  .app-shell .category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell .oh-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 850px) {
+  .app-shell .om-order-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .app-shell .page-content {
+    padding: 22px 14px;
+  }
+
+  .app-shell .food-grid,
+  .app-shell .category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell .food-image {
+    height: 210px;
+  }
+
+  .app-shell .category-art {
+    height: 190px;
+  }
+
+  .app-shell .av-food-image {
+    width: 48px;
+    height: 48px;
+  }
+
+  .app-shell .av-status {
+    font-size: 8px;
+    padding: 6px;
+  }
+
+  .app-shell .oh-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell .om-order-actions {
+    flex-wrap: wrap;
+  }
+}
