@@ -18,10 +18,12 @@ import {
   Pencil,
   UserCheck,
   UserX,
-  ArrowLeft
+  ArrowLeft,
+  Plus,
+  Filter
 } from "lucide-react";
 
-import "./admin-dashboard.css";
+import "../styles/admin-dashboard.css";
 import grabbitLogo from "../assets/grabbit-logo.png";
 
 // DEMO DATA
@@ -35,15 +37,15 @@ const initialStudents = [
 ];
 
 const initialStaff = [
-  { id: "SF001", name: "Ramesh Kumar", role: "Canteen Manager", status: "Active" },
-  { id: "SF002", name: "Anita Rao", role: "Kitchen Staff", status: "Active" },
-  { id: "SF003", name: "Suresh B", role: "Kitchen Staff", status: "Active" },
-  { id: "SF004", name: "Meena S", role: "Canteen Manager", status: "Inactive" }
+  { id: "SF001", name: "Ramesh Kumar", email: "ramesh@gmail.com", role: "Canteen Manager", status: "Active" },
+  { id: "SF002", name: "Anita Rao", email: "anita@gmail.com", role: "Kitchen Staff", status: "Active" },
+  { id: "SF003", name: "Suresh B", email: "suresh@gmail.com", role: "Kitchen Staff", status: "Active" },
+  { id: "SF004", name: "Meena S", email: "meena@gmail.com", role: "Canteen Manager", status: "Inactive" }
 ];
 
-// Orders are connected to students using their unique IDs.
+// DEMO ORDERS
 
-const orders = [
+const initialOrders = [
   { id: "#GR1024", studentId: "ST001", item: "Paneer Biryani", amount: 140, status: "Completed" },
   { id: "#GR1025", studentId: "ST002", item: "Veg Fried Rice", amount: 110, status: "Preparing" },
   { id: "#GR1026", studentId: "ST003", item: "Masala Dosa", amount: 65, status: "Ready" },
@@ -62,51 +64,95 @@ const navigation = [
 function AdminDashboard() {
   const [activePage, setActivePage] = useState("Overview");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [mobileMenu, setMobileMenu] = useState(false);
 
   const [students, setStudents] = useState(initialStudents);
+  const [staff, setStaff] = useState(initialStaff);
+  const [orders] = useState(initialOrders);
+
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedStaff, setSelectedStaff] = useState(null);
+
   const [editingStudent, setEditingStudent] = useState(false);
+  const [editingStaff, setEditingStaff] = useState(false);
+  const [showStaffForm, setShowStaffForm] = useState(false);
+
   const [showConfirm, setShowConfirm] = useState(null);
 
-  const [editForm, setEditForm] = useState({
+  const [studentForm, setStudentForm] = useState({
     name: "",
     email: ""
   });
 
-  // GET THE LATEST STUDENT NAME USING STUDENT ID
+  const [staffForm, setStaffForm] = useState({
+    name: "",
+    email: "",
+    role: "Kitchen Staff"
+  });
+
+  // STUDENT NAME LOOKUP
 
   const getStudentName = studentId => {
     const student = students.find(student => student.id === studentId);
     return student ? student.name : "Unknown Student";
   };
 
-  // SEARCH FILTERS
+  // SEARCH AND FILTERING
 
-  const filteredStudents = students.filter(student =>
-    `${student.name} ${student.email} ${student.id}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const matchesSearch = text =>
+    text.toLowerCase().includes(search.trim().toLowerCase());
 
-  const filteredStaff = initialStaff.filter(member =>
-    `${member.name} ${member.role} ${member.id}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const filteredStudents = students.filter(student => {
+    const matchesText = matchesSearch(
+      `${student.name} ${student.email} ${student.id}`
+    );
 
-  const filteredOrders = orders.filter(order =>
-    `${order.id} ${getStudentName(order.studentId)} ${order.item}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+    const matchesStatus =
+      statusFilter === "All" || student.status === statusFilter;
+
+    return matchesText && matchesStatus;
+  });
+
+  const filteredStaff = staff.filter(member => {
+    const matchesText = matchesSearch(
+      `${member.name} ${member.email} ${member.role} ${member.id}`
+    );
+
+    const matchesStatus =
+      statusFilter === "All" || member.status === statusFilter;
+
+    return matchesText && matchesStatus;
+  });
+
+  const filteredOrders = orders.filter(order => {
+    const matchesText = matchesSearch(
+      `${order.id} ${getStudentName(order.studentId)} ${order.item} ${order.status}`
+    );
+
+    const matchesStatus =
+      statusFilter === "All" || order.status === statusFilter;
+
+    return matchesText && matchesStatus;
+  });
+
+  // FORM VALIDATION
+
+  const isValidEmail = email =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const isDuplicateEmail = (email, records, currentId = null) =>
+    records.some(record =>
+      record.email.toLowerCase() === email.toLowerCase() &&
+      record.id !== currentId
+    );
 
   // STUDENT MANAGEMENT
 
   const openStudent = student => {
     setSelectedStudent(student);
 
-    setEditForm({
+    setStudentForm({
       name: student.name,
       email: student.email
     });
@@ -114,18 +160,29 @@ function AdminDashboard() {
     setEditingStudent(false);
   };
 
-  // SAVE STUDENT DETAILS
-
   const saveStudent = () => {
-    if (!editForm.name.trim() || !editForm.email.trim()) {
+    const name = studentForm.name.trim();
+    const email = studentForm.email.trim();
+
+    if (!name || !email) {
       alert("Please fill in all fields.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (isDuplicateEmail(email, students, selectedStudent.id)) {
+      alert("This email address is already registered.");
       return;
     }
 
     const updatedStudent = {
       ...selectedStudent,
-      name: editForm.name.trim(),
-      email: editForm.email.trim()
+      name,
+      email
     };
 
     setStudents(previous =>
@@ -138,33 +195,186 @@ function AdminDashboard() {
 
     setSelectedStudent(updatedStudent);
     setEditingStudent(false);
+
+    alert("Student details updated successfully.");
   };
 
-  // ACTIVATE OR DEACTIVATE STUDENT
+  // STAFF MANAGEMENT
 
-  const changeStudentStatus = () => {
+  const openStaff = member => {
+    setSelectedStaff(member);
+
+    setStaffForm({
+      name: member.name,
+      email: member.email,
+      role: member.role
+    });
+
+    setEditingStaff(false);
+  };
+
+  const resetStaffForm = () => {
+    setStaffForm({
+      name: "",
+      email: "",
+      role: "Kitchen Staff"
+    });
+
+    setShowStaffForm(false);
+    setEditingStaff(false);
+    setSelectedStaff(null);
+  };
+
+  const saveStaff = () => {
+    const name = staffForm.name.trim();
+    const email = staffForm.email.trim();
+    const role = staffForm.role;
+
+    if (!name || !email || !role) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    const currentId = editingStaff ? selectedStaff.id : null;
+
+    if (isDuplicateEmail(email, staff, currentId)) {
+      alert("A staff member with this email already exists.");
+      return;
+    }
+
+    if (editingStaff) {
+      const updatedStaff = {
+        ...selectedStaff,
+        name,
+        email,
+        role
+      };
+
+      setStaff(previous =>
+        previous.map(member =>
+          member.id === selectedStaff.id
+            ? updatedStaff
+            : member
+        )
+      );
+
+      setSelectedStaff(updatedStaff);
+      setEditingStaff(false);
+
+      alert("Staff details updated successfully.");
+    } else {
+      const nextNumber =
+        staff.reduce((maximum, member) => {
+          const number = Number(member.id.replace("SF", ""));
+          return Math.max(maximum, number);
+        }, 0) + 1;
+
+      const newStaff = {
+        id: `SF${String(nextNumber).padStart(3, "0")}`,
+        name,
+        email,
+        role,
+        status: "Active"
+      };
+
+      setStaff(previous => [...previous, newStaff]);
+
+      resetStaffForm();
+
+      alert("New staff member added successfully.");
+    }
+  };
+
+  // ACCOUNT STATUS MANAGEMENT
+
+  const changeAccountStatus = () => {
+    if (!showConfirm) return;
+
     const updatedStatus =
       showConfirm.status === "Active" ? "Inactive" : "Active";
 
-    const updatedStudent = {
-      ...showConfirm,
-      status: updatedStatus
-    };
+    if (showConfirm.type === "Student") {
+      const updatedStudent = {
+        ...showConfirm,
+        status: updatedStatus
+      };
 
-    setStudents(previous =>
-      previous.map(student =>
-        student.id === showConfirm.id
-          ? updatedStudent
-          : student
-      )
-    );
+      setStudents(previous =>
+        previous.map(student =>
+          student.id === showConfirm.id
+            ? updatedStudent
+            : student
+        )
+      );
 
-    if (selectedStudent?.id === showConfirm.id) {
-      setSelectedStudent(updatedStudent);
+      if (selectedStudent?.id === showConfirm.id) {
+        setSelectedStudent(updatedStudent);
+      }
+    } else {
+      const updatedMember = {
+        ...showConfirm,
+        status: updatedStatus
+      };
+
+      setStaff(previous =>
+        previous.map(member =>
+          member.id === showConfirm.id
+            ? updatedMember
+            : member
+        )
+      );
+
+      if (selectedStaff?.id === showConfirm.id) {
+        setSelectedStaff(updatedMember);
+      }
     }
 
     setShowConfirm(null);
   };
+
+  // DYNAMIC DASHBOARD STATISTICS
+
+  const totalStudents = students.length;
+  const totalStaff = staff.length;
+  const totalOrders = orders.length;
+
+  const totalRevenue = orders.reduce(
+    (total, order) => total + order.amount,
+    0
+  );
+
+  const pendingOrders = orders.filter(order =>
+    ["Received", "Preparing"].includes(order.status)
+  ).length;
+
+  const completedOrders = orders.filter(
+    order => order.status === "Completed"
+  ).length;
+
+  // DYNAMIC REPORT CALCULATIONS
+
+  const averageOrderValue =
+    totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+  const popularItems = Object.values(
+    orders.reduce((items, order) => {
+      if (!items[order.item]) {
+        items[order.item] = {
+          name: order.item,
+          count: 0
+        };
+      }
+
+      items[order.item].count += 1;
+
+      return items;
+    }, {})
+  ).sort((a, b) => b.count - a.count);
 
   // TABLE COMPONENT
 
@@ -192,12 +402,32 @@ function AdminDashboard() {
     </div>
   );
 
+  // SEARCH AND STATUS FILTER CONTROLS
+
+  const renderFilters = statuses => (
+    <div className="admin-filter-row">
+      <Filter size={16} />
+
+      <select
+        value={statusFilter}
+        onChange={e => setStatusFilter(e.target.value)}
+        aria-label="Filter by status"
+      >
+        {statuses.map(status => (
+          <option key={status} value={status}>
+            {status === "All" ? "All Statuses" : status}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   // PAGE CONTENT
 
   const renderContent = () => {
     switch (activePage) {
 
-      // STUDENTS SECTION
+      // STUDENTS
 
       case "Students":
 
@@ -233,9 +463,12 @@ function AdminDashboard() {
                   <label>
                     Student Name
                     <input
-                      value={editForm.name}
+                      value={studentForm.name}
                       onChange={e =>
-                        setEditForm({ ...editForm, name: e.target.value })
+                        setStudentForm({
+                          ...studentForm,
+                          name: e.target.value
+                        })
                       }
                     />
                   </label>
@@ -244,15 +477,17 @@ function AdminDashboard() {
                     Email Address
                     <input
                       type="email"
-                      value={editForm.email}
+                      value={studentForm.email}
                       onChange={e =>
-                        setEditForm({ ...editForm, email: e.target.value })
+                        setStudentForm({
+                          ...studentForm,
+                          email: e.target.value
+                        })
                       }
                     />
                   </label>
 
                   <div className="student-actions">
-
                     <button
                       className="admin-action-btn save"
                       onClick={saveStudent}
@@ -266,7 +501,6 @@ function AdminDashboard() {
                     >
                       Cancel
                     </button>
-
                   </div>
 
                 </div>
@@ -312,9 +546,16 @@ function AdminDashboard() {
 
                     <button
                       className={`admin-action-btn ${
-                        selectedStudent.status === "Active" ? "deactivate" : "activate"
+                        selectedStudent.status === "Active"
+                          ? "deactivate"
+                          : "activate"
                       }`}
-                      onClick={() => setShowConfirm(selectedStudent)}
+                      onClick={() =>
+                        setShowConfirm({
+                          ...selectedStudent,
+                          type: "Student"
+                        })
+                      }
                     >
                       {selectedStudent.status === "Active"
                         ? <><UserX size={15} /> Deactivate Account</>
@@ -340,6 +581,8 @@ function AdminDashboard() {
                 <p>View and manage registered students.</p>
               </div>
             </div>
+
+            {renderFilters(["All", "Active", "Inactive"])}
 
             {renderTable(
               ["STUDENT ID", "NAME", "EMAIL", "ORDERS", "STATUS", "ACTIONS"],
@@ -372,9 +615,172 @@ function AdminDashboard() {
           </section>
         );
 
-      // STAFF SECTION
+      // STAFF
 
       case "Staff":
+
+        if (selectedStaff) {
+          return (
+            <section className="admin-panel-card student-detail">
+
+              <button
+                className="student-back"
+                onClick={() => {
+                  setSelectedStaff(null);
+                  setEditingStaff(false);
+                }}
+              >
+                <ArrowLeft size={16} /> Back to Staff
+              </button>
+
+              <div className="admin-card-heading">
+                <div>
+                  <span className="admin-eyebrow">STAFF PROFILE</span>
+                  <h2>{selectedStaff.name}</h2>
+                  <p>Staff ID: {selectedStaff.id}</p>
+                </div>
+
+                <span className={`admin-status ${selectedStaff.status.toLowerCase()}`}>
+                  {selectedStaff.status}
+                </span>
+              </div>
+
+              {editingStaff ? (
+                <div className="student-edit-form">
+
+                  <label>
+                    Full Name
+                    <input
+                      value={staffForm.name}
+                      onChange={e =>
+                        setStaffForm({
+                          ...staffForm,
+                          name: e.target.value
+                        })
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Email Address
+                    <input
+                      type="email"
+                      value={staffForm.email}
+                      onChange={e =>
+                        setStaffForm({
+                          ...staffForm,
+                          email: e.target.value
+                        })
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Staff Role
+                    <select
+                      value={staffForm.role}
+                      onChange={e =>
+                        setStaffForm({
+                          ...staffForm,
+                          role: e.target.value
+                        })
+                      }
+                    >
+                      <option value="Canteen Manager">Canteen Manager</option>
+                      <option value="Kitchen Staff">Kitchen Staff</option>
+                    </select>
+                  </label>
+
+                  <div className="student-actions">
+                    <button
+                      className="admin-action-btn save"
+                      onClick={saveStaff}
+                    >
+                      Save Changes
+                    </button>
+
+                    <button
+                      className="admin-action-btn cancel"
+                      onClick={() => setEditingStaff(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                </div>
+              ) : (
+                <>
+                  <div className="student-detail-grid">
+
+                    <div>
+                      <span>Staff ID</span>
+                      <strong>{selectedStaff.id}</strong>
+                    </div>
+
+                    <div>
+                      <span>Full Name</span>
+                      <strong>{selectedStaff.name}</strong>
+                    </div>
+
+                    <div>
+                      <span>Email Address</span>
+                      <strong>{selectedStaff.email}</strong>
+                    </div>
+
+                    <div>
+                      <span>Role</span>
+                      <strong>{selectedStaff.role}</strong>
+                    </div>
+
+                    <div>
+                      <span>Account Status</span>
+                      <strong>{selectedStaff.status}</strong>
+                    </div>
+
+                  </div>
+
+                  <div className="student-actions">
+
+                    <button
+                      className="admin-action-btn save"
+                      onClick={() => {
+                        setStaffForm({
+                          name: selectedStaff.name,
+                          email: selectedStaff.email,
+                          role: selectedStaff.role
+                        });
+                        setEditingStaff(true);
+                      }}
+                    >
+                      <Pencil size={15} /> Edit Details
+                    </button>
+
+                    <button
+                      className={`admin-action-btn ${
+                        selectedStaff.status === "Active"
+                          ? "deactivate"
+                          : "activate"
+                      }`}
+                      onClick={() =>
+                        setShowConfirm({
+                          ...selectedStaff,
+                          type: "Staff"
+                        })
+                      }
+                    >
+                      {selectedStaff.status === "Active"
+                        ? <><UserX size={15} /> Deactivate Account</>
+                        : <><UserCheck size={15} /> Activate Account</>
+                      }
+                    </button>
+
+                  </div>
+                </>
+              )}
+
+            </section>
+          );
+        }
 
         return (
           <section className="admin-panel-card">
@@ -383,23 +789,116 @@ function AdminDashboard() {
               <div>
                 <span className="admin-eyebrow">WORKFORCE MANAGEMENT</span>
                 <h2>Staff Directory</h2>
-                <p>Monitor your canteen workforce.</p>
+                <p>Add and manage canteen staff members.</p>
               </div>
+
+              <button
+                className="admin-action-btn save"
+                onClick={() => {
+                  setShowStaffForm(true);
+                  setSelectedStaff(null);
+                }}
+              >
+                <Plus size={16} /> Add Staff
+              </button>
             </div>
 
+            {showStaffForm && (
+              <div className="admin-panel-card">
+                <h2>Add New Staff Member</h2>
+
+                <div className="student-edit-form">
+
+                  <label>
+                    Full Name
+                    <input
+                      value={staffForm.name}
+                      onChange={e =>
+                        setStaffForm({
+                          ...staffForm,
+                          name: e.target.value
+                        })
+                      }
+                      placeholder="Enter staff name"
+                    />
+                  </label>
+
+                  <label>
+                    Email Address
+                    <input
+                      type="email"
+                      value={staffForm.email}
+                      onChange={e =>
+                        setStaffForm({
+                          ...staffForm,
+                          email: e.target.value
+                        })
+                      }
+                      placeholder="Enter email address"
+                    />
+                  </label>
+
+                  <label>
+                    Staff Role
+                    <select
+                      value={staffForm.role}
+                      onChange={e =>
+                        setStaffForm({
+                          ...staffForm,
+                          role: e.target.value
+                        })
+                      }
+                    >
+                      <option value="Canteen Manager">Canteen Manager</option>
+                      <option value="Kitchen Staff">Kitchen Staff</option>
+                    </select>
+                  </label>
+
+                  <div className="student-actions">
+                    <button
+                      className="admin-action-btn save"
+                      onClick={saveStaff}
+                    >
+                      Add Staff Member
+                    </button>
+
+                    <button
+                      className="admin-action-btn cancel"
+                      onClick={resetStaffForm}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {renderFilters(["All", "Active", "Inactive"])}
+
             {renderTable(
-              ["STAFF ID", "NAME", "ROLE", "STATUS"],
+              ["STAFF ID", "NAME", "EMAIL", "ROLE", "STATUS", "ACTIONS"],
 
               filteredStaff.map(member => (
                 <tr key={member.id}>
                   <td>{member.id}</td>
                   <td className="admin-name">{member.name}</td>
+                  <td>{member.email}</td>
                   <td>{member.role}</td>
 
                   <td>
                     <span className={`admin-status ${member.status.toLowerCase()}`}>
                       {member.status}
                     </span>
+                  </td>
+
+                  <td>
+                    <button
+                      className="student-view-btn"
+                      onClick={() => openStaff(member)}
+                    >
+                      <Eye size={15} /> View
+                    </button>
                   </td>
                 </tr>
               ))
@@ -408,7 +907,7 @@ function AdminDashboard() {
           </section>
         );
 
-      // ORDERS SECTION
+      // ORDERS
 
       case "Orders":
 
@@ -423,17 +922,23 @@ function AdminDashboard() {
               </div>
             </div>
 
+            {renderFilters([
+              "All",
+              "Received",
+              "Preparing",
+              "Ready",
+              "Completed"
+            ])}
+
             {renderTable(
               ["ORDER ID", "STUDENT", "ITEM", "AMOUNT", "STATUS"],
 
               filteredOrders.map(order => (
                 <tr key={order.id}>
                   <td>{order.id}</td>
-
                   <td className="admin-name">
                     {getStudentName(order.studentId)}
                   </td>
-
                   <td>{order.item}</td>
                   <td>₹{order.amount}</td>
 
@@ -449,7 +954,7 @@ function AdminDashboard() {
           </section>
         );
 
-      // REPORTS SECTION
+      // REPORTS
 
       case "Reports":
 
@@ -459,23 +964,37 @@ function AdminDashboard() {
 
               <span className="admin-eyebrow">PERFORMANCE OVERVIEW</span>
               <h2>Reports & Analytics</h2>
-              <p>Application performance at a glance.</p>
+              <p>Statistics calculated from the available order records.</p>
 
               <div className="report-grid">
+
                 <div>
                   <span>Total Sales</span>
-                  <h2>₹24,850</h2>
+                  <h2>₹{totalRevenue.toLocaleString("en-IN")}</h2>
                 </div>
 
                 <div>
                   <span>Total Orders</span>
-                  <h2>186</h2>
+                  <h2>{totalOrders}</h2>
                 </div>
 
                 <div>
                   <span>Average Order Value</span>
-                  <h2>₹133</h2>
+                  <h2>
+                    ₹{averageOrderValue.toFixed(2)}
+                  </h2>
                 </div>
+
+                <div>
+                  <span>Completed Orders</span>
+                  <h2>{completedOrders}</h2>
+                </div>
+
+                <div>
+                  <span>Pending Orders</span>
+                  <h2>{pendingOrders}</h2>
+                </div>
+
               </div>
 
             </section>
@@ -485,26 +1004,22 @@ function AdminDashboard() {
               <span className="admin-eyebrow">FOOD INSIGHTS</span>
               <h2>Popular Food Items</h2>
 
-              <div className="popular-food">
-                <span>Paneer Biryani</span>
-                <strong>42 orders</strong>
-              </div>
-
-              <div className="popular-food">
-                <span>Masala Dosa</span>
-                <strong>36 orders</strong>
-              </div>
-
-              <div className="popular-food">
-                <span>Veg Fried Rice</span>
-                <strong>29 orders</strong>
-              </div>
+              {popularItems.length > 0 ? (
+                popularItems.map(item => (
+                  <div className="popular-food" key={item.name}>
+                    <span>{item.name}</span>
+                    <strong>{item.count} orders</strong>
+                  </div>
+                ))
+              ) : (
+                <p>No order data available.</p>
+              )}
 
             </section>
           </>
         );
 
-      // OVERVIEW SECTION
+      // OVERVIEW
 
       default:
 
@@ -517,7 +1032,7 @@ function AdminDashboard() {
                   <Users />
                 </div>
                 <span>Total Students</span>
-                <h2>1,248</h2>
+                <h2>{totalStudents}</h2>
                 <small>Registered students</small>
               </div>
 
@@ -526,8 +1041,8 @@ function AdminDashboard() {
                   <UserRoundCog />
                 </div>
                 <span>Total Staff</span>
-                <h2>24</h2>
-                <small>Across all canteens</small>
+                <h2>{totalStaff}</h2>
+                <small>Registered staff members</small>
               </div>
 
               <div className="admin-stat-card">
@@ -535,8 +1050,8 @@ function AdminDashboard() {
                   <ShoppingBag />
                 </div>
                 <span>Total Orders</span>
-                <h2>186</h2>
-                <small>Today's orders</small>
+                <h2>{totalOrders}</h2>
+                <small>Available order records</small>
               </div>
 
               <div className="admin-stat-card">
@@ -544,8 +1059,8 @@ function AdminDashboard() {
                   <IndianRupee />
                 </div>
                 <span>Total Revenue</span>
-                <h2>₹24,850</h2>
-                <small>Today's sales</small>
+                <h2>₹{totalRevenue.toLocaleString("en-IN")}</h2>
+                <small>Calculated from order records</small>
               </div>
 
             </div>
@@ -560,7 +1075,11 @@ function AdminDashboard() {
                     <h2>Recent Orders</h2>
                   </div>
 
-                  <button onClick={() => setActivePage("Orders")}>
+                  <button onClick={() => {
+                    setActivePage("Orders");
+                    setSearch("");
+                    setStatusFilter("All");
+                  }}>
                     View all →
                   </button>
                 </div>
@@ -576,7 +1095,6 @@ function AdminDashboard() {
                       <strong>
                         {getStudentName(order.studentId)}
                       </strong>
-
                       <span>{order.item}</span>
                     </div>
 
@@ -599,15 +1117,15 @@ function AdminDashboard() {
                   <CheckCircle2 />
                   <div>
                     <strong>Student accounts</strong>
-                    <span>Active and operational</span>
+                    <span>{students.filter(student => student.status === "Active").length} active accounts</span>
                   </div>
                 </div>
 
                 <div className="health-item">
                   <CheckCircle2 />
                   <div>
-                    <strong>Canteen operations</strong>
-                    <span>Running smoothly</span>
+                    <strong>Staff accounts</strong>
+                    <span>{staff.filter(member => member.status === "Active").length} active staff members</span>
                   </div>
                 </div>
 
@@ -615,7 +1133,7 @@ function AdminDashboard() {
                   <Clock />
                   <div>
                     <strong>Pending orders</strong>
-                    <span>Require monitoring</span>
+                    <span>{pendingOrders} orders require monitoring</span>
                   </div>
                 </div>
 
@@ -631,8 +1149,6 @@ function AdminDashboard() {
 
   return (
     <div className="admin-layout">
-
-      {/* SIDEBAR */}
 
       <aside className={`admin-sidebar ${mobileMenu ? "open" : ""}`}>
 
@@ -661,8 +1177,12 @@ function AdminDashboard() {
                 onClick={() => {
                   setActivePage(item.name);
                   setSearch("");
+                  setStatusFilter("All");
                   setSelectedStudent(null);
+                  setSelectedStaff(null);
                   setEditingStudent(false);
+                  setEditingStaff(false);
+                  setShowStaffForm(false);
                   setMobileMenu(false);
                 }}
               >
@@ -685,8 +1205,6 @@ function AdminDashboard() {
         </div>
 
       </aside>
-
-      {/* MAIN CONTENT */}
 
       <main className="admin-main">
 
@@ -746,14 +1264,14 @@ function AdminDashboard() {
           {renderContent()}
 
           <footer className="admin-footer">
-            GRABBIT ADMIN PANEL · MADE WITH CARE ♡
+            GRABBIT ADMIN PANEL
           </footer>
 
         </div>
 
       </main>
 
-      {/* STATUS CONFIRMATION MODAL */}
+      {/* ACCOUNT STATUS CONFIRMATION */}
 
       {showConfirm && (
         <div className="admin-modal-overlay">
@@ -762,8 +1280,8 @@ function AdminDashboard() {
 
             <h2>
               {showConfirm.status === "Active"
-                ? "Deactivate Student?"
-                : "Activate Student?"}
+                ? `Deactivate ${showConfirm.type}?`
+                : `Activate ${showConfirm.type}?`}
             </h2>
 
             <p>
@@ -783,9 +1301,11 @@ function AdminDashboard() {
 
               <button
                 className={`admin-action-btn ${
-                  showConfirm.status === "Active" ? "deactivate" : "activate"
+                  showConfirm.status === "Active"
+                    ? "deactivate"
+                    : "activate"
                 }`}
-                onClick={changeStudentStatus}
+                onClick={changeAccountStatus}
               >
                 Confirm
               </button>
