@@ -1,5 +1,5 @@
 
-function FoodCard({ food }) {
+function FoodCard({ food, onAddToCart }) {
   const hasImage =
     typeof food.image === "string" &&
     (food.image.startsWith("http") ||
@@ -36,6 +36,7 @@ function FoodCard({ food }) {
 
         <div className="student-food-bottom">
           <span className="student-food-price">₹{food.price}</span>
+
           <span
             className={`student-food-availability ${
               food.available ? "available-text" : "unavailable-text"
@@ -44,6 +45,15 @@ function FoodCard({ food }) {
             {food.available ? "Ready to order" : "Currently unavailable"}
           </span>
         </div>
+
+        <button
+          type="button"
+          className="student-add-cart-button"
+          onClick={() => onAddToCart(food)}
+          disabled={!food.available}
+        >
+          {food.available ? "＋ Add to Cart" : "Unavailable"}
+        </button>
       </div>
     </article>
   );
