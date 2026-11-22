@@ -19,6 +19,14 @@ import {
   CheckCircle2,
   ToggleLeft
 } from "lucide-react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate
+} from "react-router-dom";
+import AdminDashboard from "./pages/AdminDashboard";
+import CanteenPanel from "./pages/CanteenPanel";
 
 import FoodManagement from "./pages/FoodManagement";
 import CategoryManagement from "./pages/CategoryManagement";
@@ -316,8 +324,19 @@ function App() {
     }
   };
 
-  // TEMPORARY: Display Brinda's student menu for preview.
-  return <StudentMenu />;
+  return (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<StudentMenu />} />
+
+      <Route path="/canteen" element={<CanteenPanel />} />
+
+      <Route path="/admin" element={<AdminDashboard />} />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  </BrowserRouter>
+);
 }
 
 export default App;
