@@ -25,6 +25,7 @@ import CategoryManagement from "./pages/CategoryManagement";
 import AvailabilityManagement from "./pages/AvailabilityManagement";
 import OrderManagement from "./pages/OrderManagement";
 import OrderHistory from "./pages/OrderHistory";
+import StudentMenu from "./pages/StudentMenu";
 
 import { useCanteenData } from "./context/CanteenDataContext";
 
@@ -315,105 +316,8 @@ function App() {
     }
   };
 
-  return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">m</div>
-          <div>
-            <h2>GRABBIT<span>.</span></h2>
-            <p>CANTEEN MANAGEMENT</p>
-          </div>
-        </div>
-
-        <div className="sidebar-label">MENU</div>
-
-        <nav className="navigation">
-          {navigation.map(({ name, icon: Icon }) => (
-            <button
-              key={name}
-              className={`nav-item ${activePage === name ? "active" : ""}`}
-              onClick={() => setActivePage(name)}
-            >
-              <Icon size={19} strokeWidth={1.8} />
-              <span>{name}</span>
-
-              {name === "Order Management" && (
-                <span className="nav-count">
-                  {activeOrders.length}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="sidebar-label">PREFERENCES</div>
-
-          <button
-            className={`nav-item ${activePage === "Settings" ? "active" : ""}`}
-            onClick={() => setActivePage("Settings")}
-          >
-            <Settings size={19} />
-            <span>Settings</span>
-          </button>
-
-          <div className="canteen-card">
-            <div className="canteen-avatar">🍃</div>
-            <div>
-              <strong>Campus Kitchen</strong>
-              <p>Open for orders</p>
-            </div>
-            <span className="online-dot" />
-          </div>
-        </div>
-      </aside>
-
-      <main className="main-content">
-        <header className="topbar">
-          <div className="breadcrumb">
-            <span>Workspace</span>
-            <span className="breadcrumb-divider">/</span>
-            <strong>{activePage}</strong>
-          </div>
-
-          <div className="topbar-actions">
-            <div className="search-box">
-              <Search size={17} />
-              <input
-                placeholder="Search orders..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-              <kbd>⌘ K</kbd>
-            </div>
-
-            <button
-              className="icon-button notification-button"
-              onClick={() => setNotifications(!notifications)}
-              aria-label="Toggle notifications"
-            >
-              <Bell size={19} />
-              {notifications && <span className="notification-dot" />}
-            </button>
-
-            <div className="profile">
-              <div className="profile-avatar">CK</div>
-              <div className="profile-info">
-                <strong>Campus Kitchen</strong>
-                <span>Administrator</span>
-              </div>
-              <ChevronDown size={16} />
-            </div>
-          </div>
-        </header>
-
-        <div className="page-content">
-          {renderPage()}
-        </div>
-      </main>
-    </div>
-  );
+  // TEMPORARY: Display Brinda's student menu for preview.
+  return <StudentMenu />;
 }
 
 export default App;
