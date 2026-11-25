@@ -7,16 +7,97 @@ import "../styles/student-menu.css";
 
 function StudentMenu() {
   const { foods = [], categories = [] } = useCanteenData();
+
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [cart, setCart] = useState([]);
 
   const categoryNames = categories.map((category) =>
     typeof category === "string" ? category : category.name
   );
 
-  const filteredFoods =
-    selectedCategory === "All"
-      ? foods
-      : foods.filter((food) => food.category === selectedCategory);
+  // Filter food items by category and search query.
+  const filteredFoods = foods.filter((food) => {
+    const matchesCategory =
+      selectedCategory === "All" ||
+      food.category === selectedCategory;
+
+    const matchesSearch = food.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase().trim());
+
+    return matchesCategory && matchesSearch;
+  });
+
+  // Add an available food item to the cart.
+  const addToCart = (food) => {
+    if (!food.available) return;
+
+    setCart((oldCart) => {
+      const existingItem = oldCart.find(
+        (item) => item.foodId === food.id
+      );
+
+      if (existingItem) {
+        return oldCart.map((item) =>
+          item.foodId === food.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      return [...oldCart, { foodId: food.id, quantity: 1 }];
+    });
+  };
+
+  // Increase item quantity.
+  const increaseQuantity = (foodId) => {
+    setCart((oldCart) =>
+      oldCart.map((item) =>
+        item.foodId === foodId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  };
+
+  // Decrease quantity or remove the item when quantity reaches zero.
+  const decreaseQuantity = (foodId) => {
+    setCart((oldCart) =>
+      oldCart
+        .map((item) =>
+          item.foodId === foodId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  // Empty the entire cart.
+  const emptyCart = () => {
+    setCart([]);
+  };
+
+  // Get the latest food details for cart items.
+  const cartItems = cart
+    .map((item) => {
+      const food = foods.find((food) => food.id === item.foodId);
+
+      return food ? { ...food, quantity: item.quantity } : null;
+    })
+    .filter(Boolean);
+
+  // Calculate cart item count and total price.
+  const cartCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
+  const cartTotal = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
   return (
     <main className="student-menu">
@@ -77,6 +158,17 @@ function StudentMenu() {
           </div>
         </div>
 
+        {/* Food Search */}
+        <div className="student-search">
+          <input
+            type="text"
+            placeholder="Search for your favourite food..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Category Filters */}
         <div className="student-category-section">
           <h3>Browse Categories</h3>
 
@@ -113,25 +205,110 @@ function StudentMenu() {
           </div>
         </div>
 
+        {/* Food Cards */}
         <div className="student-food-grid">
           {filteredFoods.length > 0 ? (
             filteredFoods.map((food) => (
-              <FoodCard key={food.id} food={food} />
+              <FoodCard
+                key={food.id}
+                food={food}
+                onAddToCart={addToCart}
+              />
             ))
           ) : (
             <div className="student-empty-state">
               <span>🍽️</span>
               <h3>No items found</h3>
-              <p>There are no food items in this category right now.</p>
+              <p>
+                No food items match your search or selected category.
+              </p>
               <button
                 type="button"
-                onClick={() => setSelectedCategory("All")}
+                onClick={() => {
+                  setSelectedCategory("All");
+                  setSearchQuery("");
+                }}
               >
                 View all items
               </button>
             </div>
           )}
         </div>
+      </section>
+
+      {/* Shopping Cart */}
+      <section className="student-cart-section" id="student-cart">
+        <div className="student-cart-heading">
+          <div>
+            <span className="student-eyebrow">YOUR SELECTION</span>
+            <h2>Your Cart<span>.</span></h2>
+          </div>
+
+          <div className="student-cart-count">
+            {cartCount} {cartCount === 1 ? "item" : "items"}
+          </div>
+        </div>
+
+        {cartItems.length === 0 ? (
+          <div className="student-cart-empty">
+            <span>🛒</span>
+            <h3>Your cart is empty</h3>
+            <p>Add something delicious from the menu to get started!</p>
+          </div>
+        ) : (
+          <>
+            <div className="student-cart-items">
+              {cartItems.map((item) => (
+                <div className="student-cart-item" key={item.id}>
+                  <div className="student-cart-item-details">
+                    <h3>{item.name}</h3>
+                    <span>₹{item.price} each</span>
+                  </div>
+
+                  <div className="student-cart-quantity">
+                    <button
+                      type="button"
+                      onClick={() => decreaseQuantity(item.id)}
+                      aria-label={`Decrease ${item.name} quantity`}
+                    >
+                      −
+                    </button>
+
+                    <span>{item.quantity}</span>
+
+                    <button
+                      type="button"
+                      onClick={() => increaseQuantity(item.id)}
+                      aria-label={`Increase ${item.name} quantity`}
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <strong className="student-cart-item-total">
+                    ₹{item.price * item.quantity}
+                  </strong>
+                </div>
+              ))}
+            </div>
+
+            <div className="student-cart-summary">
+              <span>Total Amount</span>
+              <strong>₹{cartTotal}</strong>
+            </div>
+
+            {/* Empty Cart Button */}
+            <div className="student-cart-actions">
+              <button
+                type="button"
+                className="student-empty-cart-button"
+                onClick={emptyCart}
+              >
+                Empty Cart
+              </button>
+            </div>
+          </>
+        )}
       </section>
 
       <footer className="student-footer">

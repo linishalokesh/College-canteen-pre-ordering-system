@@ -1,4 +1,4 @@
-cat > .gitignore << 'EOF'
+
 # Dependencies
 node_modules/
 frontend/node_modules/
@@ -16,4 +16,3 @@ backend/.env
 
 # Logs
 npm-debug.log*
-EOF
