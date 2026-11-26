@@ -1,10 +1,8 @@
+
 import express from "express";
 import cors from "cors";
-<<<<<<< Updated upstream
 import foodRoutes from "./routes/foodRoutes.js";
-=======
 import orderRoutes from "./routes/orderRoutes.js";
->>>>>>> Stashed changes
 
 const app = express();
 
@@ -13,7 +11,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use("/api/orders", orderRoutes);
 
 app.get("/", (req, res) => {
     res.send("Welcome to Grabbit Backend!");
@@ -27,5 +24,6 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/foods", foodRoutes);
+app.use("/api/orders", orderRoutes);
 
 export default app;
