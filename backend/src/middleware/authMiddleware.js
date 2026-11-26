@@ -1,7 +1,7 @@
 
 import jwt from "jsonwebtoken";
 
-// Verify JWT and authenticate user
+// Authenticate user using JWT
 export const protect = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -15,7 +15,17 @@ export const protect = (req, res, next) => {
 
         const token = authHeader.split(" ")[1];
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication token required"
+            });
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
 
         req.user = decoded;
 
@@ -24,15 +34,25 @@ export const protect = (req, res, next) => {
     } catch (error) {
         return res.status(401).json({
             success: false,
-            message: "Invalid or expired token"
+            message: error.name === "TokenExpiredError"
+                ? "Token has expired"
+                : "Invalid authentication token"
         });
     }
 };
 
-// Check user role
+
+// Authorize user based on role
 export const authorize = (...allowedRoles) => {
     return (req, res, next) => {
-        if (!req.user || !allowedRoles.includes(req.user.role)) {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required"
+            });
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
             return res.status(403).json({
                 success: false,
                 message: "You are not authorized to access this resource"

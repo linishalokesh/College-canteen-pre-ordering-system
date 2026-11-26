@@ -4,22 +4,54 @@ import { randomUUID } from "crypto";
 import users from "../data/users.js";
 import generateToken from "../utils/generateToken.js";
 
+const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
 // Register a new user
 export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Validate required fields
-        if (!name || !email || !password) {
+        if (
+            typeof name !== "string" ||
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            !name.trim() ||
+            !email.trim() ||
+            !password
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Name, email and password are required"
             });
         }
 
-        // Check whether email is already registered
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!isValidEmail(normalizedEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide a valid email address"
+            });
+        }
+
+        if (password.length < 8 || password.length > 72) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be between 8 and 72 characters"
+            });
+        }
+
+        if (name.trim().length > 100) {
+            return res.status(400).json({
+                success: false,
+                message: "Name cannot exceed 100 characters"
+            });
+        }
+
         const existingUser = users.find(
-            user => user.email === email.toLowerCase().trim()
+            user => user.email === normalizedEmail
         );
 
         if (existingUser) {
@@ -29,21 +61,18 @@ export const register = async (req, res) => {
             });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user
         const newUser = {
             id: randomUUID(),
             name: name.trim(),
-            email: email.toLowerCase().trim(),
+            email: normalizedEmail,
             password: hashedPassword,
             role: "student"
         };
 
         users.push(newUser);
 
-        // Generate JWT
         const token = generateToken(newUser);
 
         return res.status(201).json({
@@ -76,17 +105,29 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validate required fields
-        if (!email || !password) {
+        if (
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            !email.trim() ||
+            !password
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Email and password are required"
             });
         }
 
-        // Find user
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!isValidEmail(normalizedEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide a valid email address"
+            });
+        }
+
         const user = users.find(
-            user => user.email === email.toLowerCase().trim()
+            user => user.email === normalizedEmail
         );
 
         if (!user) {
@@ -96,7 +137,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // Compare entered password with stored hash
         const isPasswordValid = await bcrypt.compare(
             password,
             user.password
@@ -109,7 +149,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // Generate JWT
         const token = generateToken(user);
 
         return res.status(200).json({
@@ -137,13 +176,29 @@ export const login = async (req, res) => {
 };
 
 
+// Get currently authenticated user
 export const getMe = (req, res) => {
+    const user = users.find(
+        user => user.id === req.user.id
+    );
+
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found"
+        });
+    }
+
     return res.status(200).json({
         success: true,
         message: "User details retrieved successfully",
         data: {
-            user: req.user
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
         }
     });
 };
-
