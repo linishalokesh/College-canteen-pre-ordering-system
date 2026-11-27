@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import foodRoutes from "./routes/foodRoutes.js";
 
 const app = express();
 
@@ -19,5 +20,7 @@ app.get("/api/health", (req, res) => {
         message: "Grabbit backend is running!"
     });
 });
+
+app.use("/api/foods", foodRoutes);
 
 export default app;
